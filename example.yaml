@@ -1,0 +1,17 @@
+settings:
+  pool_size: 5
+  checks_per_endpoint: 10
+  default_timeout: 2.0
+  default_retries: 2
+  default_retry_delay: 0.5
+
+endpoints:
+  - url: https://httpbin.org/status/200
+    method: GET
+  - url: https://httpbin.org/delay/1
+    method: GET
+    timeout: 3.0
+  - url: https://httpbin.org/status/500
+    method: GET
+    retries: 3
+    retry_delay: 0.1
