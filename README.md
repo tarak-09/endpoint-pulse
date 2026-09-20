@@ -43,13 +43,29 @@ endpoints:
 
 ## Usage
 
-Run the tool using `uv`:
+Run the tool using `uv`. You can optionally specify a SQLite database to save the run metrics for historical tracking:
 
 ```bash
 uv run monitor -c example.yaml
+# Or, to save metrics:
+uv run monitor -c example.yaml --db metrics.db
 ```
 
-### Example Output
+### Viewing History
+If you have saved metrics using the `--db` flag, you can view a history of latency trends and failure rates using the `history` subcommand:
+
+```bash
+uv run monitor history --db metrics.db
+```
+
+This will render a text-based table like:
+```text
+Timestamp              | URL                            | Reqs  | Fail %  | p50(ms)  | p95(ms)  | p99(ms) 
+---------------------------------------------------------------------------------------------------------
+2024-01-01 12:00:00    | https://httpbin.org/status/200 | 50    | 0.0%    | 115.42   | 138.91   | 150.12  
+```
+
+### Example Output (JSON)
 ```json
 [
   {

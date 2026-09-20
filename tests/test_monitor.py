@@ -68,3 +68,34 @@ def test_metrics_calculation():
     assert result["successes"] == 4
     # With 4 points: p50 should be ~0.25, p95 should be ~0.385, p99 should be ~0.397
     assert 200 <= result["latencies"]["p50_ms"] <= 300
+
+def test_db_persistence(tmp_path):
+    from monitor.db import init_db, save_metrics, get_history
+    db_file = tmp_path / "test.db"
+    
+    conn = init_db(str(db_file))
+    
+    results = [
+        {
+            "url": "http://example.com",
+            "total_requests": 10,
+            "successes": 8,
+            "failures": 2,
+            "latencies": {
+                "p50_ms": 100.0,
+                "p95_ms": 150.0,
+                "p99_ms": 200.0
+            }
+        }
+    ]
+    
+    save_metrics(conn, results)
+    conn.close()
+    
+    rows = get_history(str(db_file))
+    assert len(rows) == 1
+    # timestamp, url, total_requests, failures, p50_ms, p95_ms, p99_ms
+    assert rows[0][1] == "http://example.com"
+    assert rows[0][2] == 10
+    assert rows[0][3] == 2
+    assert rows[0][4] == 100.0
