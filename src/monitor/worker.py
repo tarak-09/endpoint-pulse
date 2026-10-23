@@ -29,11 +29,34 @@ class WorkerPool:
                     latency = time.monotonic() - start_time
                     status = response.status
                     
-                    if status == endpoint.expected_status:
+                    error_msg = None
+                    if status != endpoint.expected_status:
+                        error_msg = f"Unexpected status: {status}"
+                    elif endpoint.assertions:
+                        body = await response.text()
+                        if endpoint.assertions.regex:
+                            import re
+                            if not re.search(endpoint.assertions.regex, body):
+                                error_msg = f"Regex assertion failed: {endpoint.assertions.regex}"
+                        
+                        if not error_msg and endpoint.assertions.jsonpath:
+                            import json
+                            from jsonpath_ng import parse
+                            try:
+                                data = json.loads(body)
+                                jsonpath_expr = parse(endpoint.assertions.jsonpath)
+                                matches = jsonpath_expr.find(data)
+                                if not matches:
+                                    error_msg = f"JSONPath assertion failed: {endpoint.assertions.jsonpath}"
+                            except json.JSONDecodeError:
+                                error_msg = "JSONDecodeError: payload is malformed"
+                            except Exception as e:
+                                error_msg = f"JSONPath error: {str(e)}"
+                    
+                    if not error_msg:
                         self.metrics[endpoint.url].add_result(latency, status)
                         return
                     else:
-                        error_msg = f"Unexpected status: {status}"
                         if attempt == retries:
                             self.metrics[endpoint.url].add_result(latency, status, error=error_msg)
                             return

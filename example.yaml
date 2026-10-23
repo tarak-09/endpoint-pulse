@@ -15,3 +15,15 @@ endpoints:
     method: GET
     retries: 3
     retry_delay: 0.1
+  - url: https://httpbin.org/json
+    method: GET
+    assertions:
+      jsonpath: "$.slideshow.author"
+  - url: https://httpbin.org/html
+    method: GET
+    assertions:
+      regex: "<h1>.*</h1>"
+  - url: https://httpbin.org/json?fail=1
+    method: GET
+    assertions:
+      jsonpath: "$.slideshow.invalid_key"

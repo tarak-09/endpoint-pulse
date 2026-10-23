@@ -9,6 +9,10 @@ class GlobalSettings(BaseModel):
     default_retries: int = Field(3, ge=0, description="Default number of retries per check")
     default_retry_delay: float = Field(1.0, ge=0.0, description="Delay between retries in seconds")
 
+class AssertionsConfig(BaseModel):
+    jsonpath: Optional[str] = None
+    regex: Optional[str] = None
+
 class EndpointConfig(BaseModel):
     url: str
     method: str = "GET"
@@ -16,6 +20,7 @@ class EndpointConfig(BaseModel):
     retries: Optional[int] = None
     retry_delay: Optional[float] = None
     expected_status: int = 200
+    assertions: Optional[AssertionsConfig] = None
 
 class MonitorConfig(BaseModel):
     settings: GlobalSettings = Field(default_factory=GlobalSettings)

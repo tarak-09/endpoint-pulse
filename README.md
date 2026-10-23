@@ -3,7 +3,7 @@
 A concurrent endpoint health monitor built with Python, `asyncio`, and `aiohttp`.
 
 ## Purpose
-This tool allows you to monitor the health and latency of a list of HTTP endpoints. It operates using an asynchronous worker pool, making it extremely efficient. It supports configurable timeouts, retry policies, and generates a structured JSON report containing latency percentiles (p50, p95, p99) and status summaries.
+This tool allows you to monitor the health and latency of a list of HTTP endpoints. It operates using an asynchronous worker pool, making it extremely efficient. It supports configurable timeouts, retry policies, response payload assertions (JSONPath and regex), and generates a structured JSON report containing latency percentiles (p50, p95, p99) and status summaries.
 
 ## Installation
 
@@ -39,6 +39,14 @@ endpoints:
     method: GET
     timeout: 3.0
     retries: 1
+  - url: https://httpbin.org/json
+    method: GET
+    assertions:
+      jsonpath: "$.slideshow.author"
+  - url: https://httpbin.org/html
+    method: GET
+    assertions:
+      regex: "<h1>.*</h1>"
 ```
 
 ## Usage
