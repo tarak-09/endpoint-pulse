@@ -30,9 +30,29 @@ class WorkerPool:
                     status = response.status
                     
                     error_msg = None
-                    if status != endpoint.expected_status:
+                    if endpoint.url.startswith("https://") and endpoint.tls_expiration_threshold is not None:
+                        conn = response.connection
+                        if conn and conn.transport:
+                            cert = conn.transport.get_extra_info("peercert")
+                            if cert and "notAfter" in cert:
+                                import ssl
+                                import time as time_module
+                                expire_timestamp = ssl.cert_time_to_seconds(cert["notAfter"])
+                                days_remaining = (expire_timestamp - time_module.time()) / 86400.0
+                                is_valid = days_remaining >= endpoint.tls_expiration_threshold
+                                self.metrics[endpoint.url].set_tls_status(is_valid, days_remaining)
+                                if not is_valid:
+                                    error_msg = f"TLS certificate expires in {days_remaining:.1f} days (threshold: {endpoint.tls_expiration_threshold})"
+                            else:
+                                self.metrics[endpoint.url].set_tls_status(False, 0.0, error="No peer certificate found")
+                                error_msg = "TLS certificate not available"
+                        else:
+                            self.metrics[endpoint.url].set_tls_status(False, 0.0, error="No connection transport")
+                            error_msg = "TLS connection transport not available"
+
+                    if not error_msg and status != endpoint.expected_status:
                         error_msg = f"Unexpected status: {status}"
-                    elif endpoint.assertions:
+                    elif not error_msg and endpoint.assertions:
                         body = await response.text()
                         if endpoint.assertions.regex:
                             import re

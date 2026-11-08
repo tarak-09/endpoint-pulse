@@ -9,6 +9,15 @@ class EndpointMetrics:
         self.failures = 0
         self.status_codes: Dict[int, int] = {}
         self.errors: Dict[str, int] = {}
+        self.tls_status = None
+
+    def set_tls_status(self, valid: bool, days_remaining: float, error: str = None):
+        self.tls_status = {
+            "valid": valid,
+            "days_remaining": days_remaining,
+        }
+        if error:
+            self.tls_status["error"] = error
 
     def add_result(self, latency: float, status_code: int, error: str = None):
         if error:
@@ -38,7 +47,7 @@ class EndpointMetrics:
             p95 = percentile(0.95)
             p99 = percentile(0.99)
             
-        return {
+        result = {
             "url": self.url,
             "total_requests": self.successes + self.failures,
             "successes": self.successes,
@@ -51,3 +60,6 @@ class EndpointMetrics:
             "status_codes": self.status_codes,
             "errors": self.errors
         }
+        if self.tls_status is not None:
+            result["tls_status"] = self.tls_status
+        return result

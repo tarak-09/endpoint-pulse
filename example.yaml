@@ -23,6 +23,9 @@ endpoints:
     method: GET
     assertions:
       regex: "<h1>.*</h1>"
+  - url: https://google.com
+    method: GET
+    tls_expiration_threshold: 30
   - url: https://httpbin.org/json?fail=1
     method: GET
     assertions:

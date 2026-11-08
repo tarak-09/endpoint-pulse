@@ -21,6 +21,7 @@ class EndpointConfig(BaseModel):
     retry_delay: Optional[float] = None
     expected_status: int = 200
     assertions: Optional[AssertionsConfig] = None
+    tls_expiration_threshold: Optional[int] = Field(None, description="Minimum number of days before TLS certificate expires")
 
 class MonitorConfig(BaseModel):
     settings: GlobalSettings = Field(default_factory=GlobalSettings)

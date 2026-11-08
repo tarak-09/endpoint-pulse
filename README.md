@@ -47,6 +47,8 @@ endpoints:
     method: GET
     assertions:
       regex: "<h1>.*</h1>"
+  - url: https://example.com
+    tls_expiration_threshold: 30 # Check if TLS cert expires in < 30 days
 ```
 
 ## Usage
@@ -89,7 +91,11 @@ Timestamp              | URL                            | Reqs  | Fail %  | p50(
     "status_codes": {
       "200": 50
     },
-    "errors": {}
+    "errors": {},
+    "tls_status": {
+      "valid": true,
+      "days_remaining": 45.2
+    }
   },
   {
     "url": "https://httpbin.org/status/500",
